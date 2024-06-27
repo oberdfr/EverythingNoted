@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.shoppinglist.utils.hasDecimalNumber
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -163,7 +164,7 @@ fun shoppingListItem(
                             textAlign = TextAlign.Start
                         )
                         Text(
-                            text = "x${item.quantity}",
+                            text = item.quantityDesc,
                             modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
                             fontSize = 20.sp,
                             textAlign = TextAlign.End
@@ -202,7 +203,7 @@ fun shoppingListItem(
                             textAlign = TextAlign.Start
                         )
                         Text(
-                            text = "x${item.quantity}",
+                            text = item.quantityDesc,
                             modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
                             fontSize = 20.sp,
                             textAlign = TextAlign.End
@@ -358,10 +359,31 @@ fun ShoppingListApp(){
 
                             Button(onClick = {
                                 if (itemName.isNotBlank()) {
+                                    val finalQuantityDesc: String
+                                    val finalQuantity: Float
+
+                                    // Check if the input is an integer
+                                    val intValue = itemQuantity.toIntOrNull()
+                                    val floatValue = itemQuantity.toFloatOrNull()
+                                    if (intValue != null || floatValue != null) {
+                                        if (hasDecimalNumber(itemQuantity)){
+                                            finalQuantityDesc = "x" + floatValue.toString()
+                                            finalQuantity = itemQuantity.toFloat()
+                                        } else {
+                                            finalQuantityDesc = "x" + intValue.toString()
+                                            finalQuantity = itemQuantity.toFloat()
+                                        }
+                                    } else {
+                                        finalQuantityDesc = itemQuantity
+                                        finalQuantity = 0f
+                                    }
+
                                     val newItem = ShoppingItem(
                                         id = sItems.size + 1,
                                         name = itemName,
-                                        quantity = itemQuantity.toInt() ,
+                                        // itemQuantity is the fetched data from the text field
+                                        quantityDesc = finalQuantityDesc,
+                                        quantity = finalQuantity,
                                         description = itemDescription
                                     )
                                     sItems = sItems + newItem
