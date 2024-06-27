@@ -57,11 +57,11 @@ fun shoppingListItem(
             .fillMaxWidth()
             .border(
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
-                shape = RoundedCornerShape(20)
+                shape = RoundedCornerShape(15.dp)
             )
             .background(
                 MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(20)
+                shape = RoundedCornerShape(15.dp)
             )
     ) {
         if (item.description.isNotEmpty()) {
@@ -76,11 +76,11 @@ fun shoppingListItem(
                         .fillMaxWidth()
                         .border(
                         border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
-                        shape = RoundedCornerShape(40)
+                        shape = RoundedCornerShape(15.dp)
                         )
                         .background(
                             MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(40)
+                            shape = RoundedCornerShape(15.dp)
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
