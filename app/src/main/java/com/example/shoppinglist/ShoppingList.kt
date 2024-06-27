@@ -1,5 +1,6 @@
 package com.example.shoppinglist
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,121 +29,189 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun shoppingListItem(
     item: ShoppingItem,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
+    onRemove: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .fillMaxWidth()
-            .border(
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
-                shape = RoundedCornerShape(15.dp)
-            )
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(15.dp)
-            )
-    ) {
-        if (item.description.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .fillMaxWidth()
-                        .border(
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
-                        shape = RoundedCornerShape(15.dp)
-                        )
-                        .background(
-                            MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(15.dp)
-                        ),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = item.name,
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "x${item.quantity}",
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.End
-                    )
-                }
+    // Creates the CoroutineScope
+    val coroutineScope = rememberCoroutineScope()
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = item.description,
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center
-                    )
+    // Creates the dismiss state
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { state ->
+            if (state == SwipeToDismissBoxValue.EndToStart) {
+                coroutineScope.launch {
+                    delay(225.milliseconds)
+                    onRemove()
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                true
+            } else {
+                false
+            }
+        }
+    )
+
+    var showIcon by remember { mutableStateOf(false) }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val color by animateColorAsState(
+                when (dismissState.targetValue) {
+                    SwipeToDismissBoxValue.Settled -> Color.Transparent
+                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.tertiaryContainer
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                }, label = "Changing color"
+            )
+
+            when (dismissState.targetValue){
+                SwipeToDismissBoxValue.Settled -> showIcon = false
+                SwipeToDismissBoxValue.StartToEnd -> showIcon = true
+                SwipeToDismissBoxValue.EndToStart -> showIcon = true
             }
 
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = item.name,
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .border(
+                        border = BorderStroke(0.dp, Color.Transparent),
+                        shape = RoundedCornerShape(15.dp)
                     )
-                    Text(
-                        text = "x${item.quantity}",
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.End
+                    .background(color,
+                        shape = RoundedCornerShape(15.dp)
+                    ),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                if (showIcon) {
+                    Icon(
+                        imageVector = (if (color == MaterialTheme.colorScheme.errorContainer) Icons.Default.Delete else Icons.Default.Edit),
+                        contentDescription = "Dynamic Swipe Icon",
+                        modifier = Modifier.align(if (color == MaterialTheme.colorScheme.errorContainer) Alignment.CenterEnd else Alignment.CenterStart)
+                            .padding(horizontal = 14.dp),
+                        tint = Color.White
                     )
                 }
             }
         }
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+                .fillMaxWidth()
+                .border(
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
+                    shape = RoundedCornerShape(15.dp)
+                )
+                .background(
+                    MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(15.dp)
+                )
+        ) {
+            if (item.description.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 14.dp)
+                            .fillMaxWidth()
+                            .border(
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
+                                shape = RoundedCornerShape(15.dp)
+                            )
+                            .background(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shape = RoundedCornerShape(15.dp)
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = item.name,
+                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Text(
+                            text = "x${item.quantity}",
+                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.End
+                        )
+                    }
 
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = item.description,
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = item.name,
+                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Text(
+                            text = "x${item.quantity}",
+                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+            }
+        }
     }
-
 }
 
 @Composable
@@ -203,13 +274,16 @@ fun ShoppingListApp(){
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        items(sItems){
-                            shoppingListItem(it, {}, {})
+                        items(sItems){ item ->
+                            shoppingListItem(
+                                item,
+                                onRemove = { sItems = sItems.filterNot { it.id == item.id } }
+                            )
                         }
                     }
                 }
             }
-            
+
             if (showDialog){
                 AlertDialog(
                     onDismissRequest = {
@@ -218,11 +292,11 @@ fun ShoppingListApp(){
                     },
 
                     title = {
-                            Text(
-                                text = "Add a product",
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
+                        Text(
+                            text = "Add a product",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
                     },
 
                     text = {
@@ -305,5 +379,3 @@ fun ShoppingListApp(){
         }
     }
 }
-
-
