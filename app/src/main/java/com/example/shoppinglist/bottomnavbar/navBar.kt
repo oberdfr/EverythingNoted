@@ -1,4 +1,4 @@
-package com.example.shoppinglist
+package com.example.shoppinglist.bottomnavbar
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height

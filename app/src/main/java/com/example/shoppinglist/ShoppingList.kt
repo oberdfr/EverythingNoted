@@ -51,11 +51,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.shoppinglist.utils.hasDecimalNumber
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
+import com.example.shoppinglist.bottomnavbar.*
+import com.example.shoppinglist.utils.hasDecimalNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

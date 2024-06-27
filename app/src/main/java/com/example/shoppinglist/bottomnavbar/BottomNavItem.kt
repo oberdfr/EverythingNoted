@@ -1,4 +1,6 @@
-package com.example.shoppinglist
+package com.example.shoppinglist.bottomnavbar
+
+import com.example.shoppinglist.R
 
 sealed class BottomNavItem(
     var title: String,
