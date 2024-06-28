@@ -235,6 +235,7 @@ fun ShoppingListApp(){
         itemName = ""
         itemQuantity = ""
         itemDescription = ""
+        showDescDialog = false
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -353,6 +354,8 @@ fun ShoppingListApp(){
                                         .fillMaxWidth()
                                         .padding(horizontal = 12.dp)
                                 )
+                            } else {
+                                itemDescription = ""
                             }
                         }
                     },
