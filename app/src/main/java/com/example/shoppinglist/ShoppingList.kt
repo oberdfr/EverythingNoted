@@ -95,10 +95,10 @@ fun shoppingListItem(
                 }, label = "Changing color"
             )
 
-            when (dismissState.targetValue){
-                SwipeToDismissBoxValue.Settled -> showIcon = false
-                SwipeToDismissBoxValue.StartToEnd -> showIcon = true
-                SwipeToDismissBoxValue.EndToStart -> showIcon = true
+            showIcon = when (dismissState.targetValue){
+                SwipeToDismissBoxValue.Settled -> false
+                SwipeToDismissBoxValue.StartToEnd -> true
+                SwipeToDismissBoxValue.EndToStart -> true
             }
 
             Box(
