@@ -60,7 +60,7 @@ import com.example.shoppinglist.utils.hasDecimalNumber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun shoppingListItem(
+fun ShoppingListItem(
     item: ShoppingItem,
     onRemove: () -> Unit,
 ) {
@@ -281,7 +281,7 @@ fun ShoppingListApp(){
                             .padding(16.dp)
                     ) {
                         items(sItems, key = { it.id }){ item ->
-                            shoppingListItem(
+                            ShoppingListItem(
                                 item,
                                 onRemove = { sItems = sItems.filterNot { it.id == item.id } }
                             )
