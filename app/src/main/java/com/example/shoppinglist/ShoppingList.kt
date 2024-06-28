@@ -123,7 +123,10 @@ fun shoppingListItem(
                     )
                 }
             }
-        }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
     ) {
         Box(
             modifier = Modifier
@@ -216,6 +219,7 @@ fun shoppingListItem(
     }
 }
 
+
 @Composable
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -276,7 +280,7 @@ fun ShoppingListApp(){
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        items(sItems){ item ->
+                        items(sItems, key = { it.id }){ item ->
                             shoppingListItem(
                                 item,
                                 onRemove = { sItems = sItems.filterNot { it.id == item.id } }
