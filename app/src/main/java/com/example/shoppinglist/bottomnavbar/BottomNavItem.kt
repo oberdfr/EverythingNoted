@@ -1,7 +1,9 @@
 package com.example.shoppinglist.bottomnavbar
 
+import androidx.compose.runtime.Immutable
 import com.example.shoppinglist.R
 
+@Immutable
 sealed class BottomNavItem(
     var title: String,
     var icon: Int
