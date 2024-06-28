@@ -38,6 +38,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -82,8 +83,6 @@ fun ShoppingListItem(
         }
     )
 
-    var showIcon by remember { mutableStateOf(false) }
-
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
@@ -95,10 +94,14 @@ fun ShoppingListItem(
                 }, label = "Changing color"
             )
 
-            showIcon = when (dismissState.targetValue){
-                SwipeToDismissBoxValue.Settled -> false
-                SwipeToDismissBoxValue.StartToEnd -> true
-                SwipeToDismissBoxValue.EndToStart -> true
+            var swipeIcon by remember {
+                mutableIntStateOf(0)
+            }
+
+            swipeIcon = when (dismissState.targetValue){
+                SwipeToDismissBoxValue.Settled -> 0
+                SwipeToDismissBoxValue.StartToEnd -> 1
+                SwipeToDismissBoxValue.EndToStart -> 2
             }
 
             Box(
@@ -108,16 +111,18 @@ fun ShoppingListItem(
                         border = BorderStroke(0.dp, Color.Transparent),
                         shape = RoundedCornerShape(15.dp)
                     )
-                    .background(color,
+                    .background(
+                        color,
                         shape = RoundedCornerShape(15.dp)
                     ),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                if (showIcon) {
+                if (swipeIcon != 0) {
                     Icon(
-                        imageVector = (if (color == MaterialTheme.colorScheme.errorContainer) Icons.Default.Delete else Icons.Default.Edit),
+                        imageVector = (if (swipeIcon == 2) Icons.Default.Delete else Icons.Default.Edit),
                         contentDescription = "Dynamic Swipe Icon",
-                        modifier = Modifier.align(if (color == MaterialTheme.colorScheme.errorContainer) Alignment.CenterEnd else Alignment.CenterStart)
+                        modifier = Modifier
+                            .align(if (swipeIcon == 2) Alignment.CenterEnd else Alignment.CenterStart)
                             .padding(horizontal = 14.dp),
                         tint = Color.White
                     )
