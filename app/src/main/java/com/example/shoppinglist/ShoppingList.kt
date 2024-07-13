@@ -64,6 +64,9 @@ import com.example.shoppinglist.utils.hasDecimalNumber
 fun ShoppingListItem(
     item: ShoppingItem,
     onRemove: () -> Unit,
+    onEdit: (ShoppingItem) -> Unit,
+    isEditing: Boolean,
+    onConfirmEdit: (ShoppingItem) -> Unit
 ) {
     // Creates the CoroutineScope
     val coroutineScope = rememberCoroutineScope()
@@ -77,11 +80,21 @@ fun ShoppingListItem(
                     onRemove()
                 }
                 true
+            } else if (state == SwipeToDismissBoxValue.StartToEnd) {
+                coroutineScope.launch {
+                    delay(225.milliseconds)
+                    onEdit(item)
+                }
+                true
             } else {
                 false
             }
         }
     )
+
+    var editedName by remember { mutableStateOf(item.name) }
+    var editedQuantity by remember { mutableStateOf(item.quantityDesc) }
+    var editedDescription by remember { mutableStateOf(item.description) }
 
     SwipeToDismissBox(
         state = dismissState,
@@ -146,83 +159,127 @@ fun ShoppingListItem(
                     shape = RoundedCornerShape(15.dp)
                 )
         ) {
-            if (item.description.isNotEmpty()) {
+            if (isEditing) {
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                         .fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(vertical = 14.dp)
-                            .fillMaxWidth()
-                            .border(
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
-                                shape = RoundedCornerShape(15.dp)
+                    OutlinedTextField(
+                        value = editedName,
+                        onValueChange = { editedName = it },
+                        label = { Text("Product Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = editedQuantity,
+                        onValueChange = { editedQuantity = it },
+                        label = { Text("Quantity") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = editedDescription,
+                        onValueChange = { editedDescription = it },
+                        label = { Text("Description") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            val updatedItem = item.copy(
+                                name = editedName,
+                                quantityDesc = editedQuantity,
+                                description = editedDescription
                             )
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainerHigh,
-                                shape = RoundedCornerShape(15.dp)
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            onConfirmEdit(updatedItem)
+                        },
+                        modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text(
-                            text = item.name,
-                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Start
-                        )
-                        Text(
-                            text = item.quantityDesc,
-                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.End
-                        )
+                        Text("Confirm")
                     }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = item.description,
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(14.dp))
                 }
-
             } else {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row(
+                if (item.description.isNotEmpty()) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .fillMaxWidth()
                     ) {
-                        Text(
-                            text = item.name,
-                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Start
-                        )
-                        Text(
-                            text = item.quantityDesc,
-                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.End
-                        )
+                        Row(
+                            modifier = Modifier
+                                .padding(vertical = 14.dp)
+                                .fillMaxWidth()
+                                .border(
+                                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondary),
+                                    shape = RoundedCornerShape(15.dp)
+                                )
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    shape = RoundedCornerShape(15.dp)
+                                ),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = item.name,
+                                modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Start
+                            )
+                            Text(
+                                text = item.quantityDesc,
+                                modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.End
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = item.description,
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = item.name,
+                                modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.Start
+                            )
+                            Text(
+                                text = item.quantityDesc,
+                                modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                                fontSize = 20.sp,
+                                textAlign = TextAlign.End
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 
 @Composable
@@ -235,6 +292,7 @@ fun ShoppingListApp(){
     var itemName by remember { mutableStateOf("") }
     var itemQuantity by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf("") }
+    var editingItemId by remember { mutableStateOf<Int?>(null) }
 
     fun resetItemFields(){
         itemName = ""
@@ -289,7 +347,17 @@ fun ShoppingListApp(){
                         items(sItems, key = { it.id }){ item ->
                             ShoppingListItem(
                                 item,
-                                onRemove = { sItems = sItems.filterNot { it.id == item.id } }
+                                onRemove = { sItems = sItems.filterNot { it.id == item.id } },
+                                onEdit = { editingItem ->
+                                    editingItemId = editingItem.id
+                                },
+                                isEditing = item.id == editingItemId,
+                                onConfirmEdit = { updatedItem ->
+                                    sItems = sItems.map {
+                                        if (it.id == updatedItem.id) updatedItem else it
+                                    }
+                                    editingItemId = null
+                                }
                             )
                         }
                     }
